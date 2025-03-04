@@ -38,35 +38,16 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.use(new GoogleStrategy({
-  clientID: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: "/auth/google/callback"
-}, async (accessToken, refreshToken, profile, done) => {
-  try {
-    const client = new MongoClient(process.env.MONGO_URI);  // Use Atlas URI
-    await client.connect();
-    const db = client.db('Restaurant');
-    const customers = db.collection('customer');
-      // Look for user by email
-      let user = await customers.findOne({ email:profile.emails[0].value });
-      if (!user) {
-        // Create new user (Mongoose will handle `_id` generation)
-        user = new User({
-          name: profile.displayName,
-          email: profile.emails[0].value,
-          phone: '0000000',
-          address:'null',
-          password:'tempPass'
-        });
-        await customers.insertOne(user);
-      }
-      
-      return done(null, user);
-  } catch (err) {
-      return done(err, null);
+// Google OAuth Routes
+app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+
+app.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/" }),
+  (req, res) => {
+    res.redirect("/dashboard");
   }
-}));
+);
 
 
 // Flash
