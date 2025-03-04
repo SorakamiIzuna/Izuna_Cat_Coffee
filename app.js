@@ -1,5 +1,7 @@
 require("dotenv").config();
 const express = require("express");
+const mongoose = require("mongoose");
+const { MongoClient } = require('mongodb');
 const session = require("express-session");
 const flash = require("connect-flash");
 const passport = require("passport");
@@ -7,6 +9,7 @@ const app = express();
 const expressLayouts = require('express-ejs-layouts');
 const User = require('./models/user');
 const connectDB = require("./config/db");
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 app.use(expressLayouts);
 app.set('layout', 'layouts/layout'); // Default layout file
 
